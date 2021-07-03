@@ -1,3 +1,3 @@
 # hero entertainment center
 
-You have to use this along with https://github.com/yingshaoxo/Local_Show
+You need to use this along with https://github.com/yingshaoxo/Local_Show

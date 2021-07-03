@@ -53,12 +53,10 @@ packages:
   discoverpingableserviceonlocalnetwork:
     dependency: "direct main"
     description:
-      path: "."
-      ref: master
-      resolved-ref: "054a868b41e2195e58720f61ca338a4195257a29"
-      url: "https://github.com/yingshaoxo/flutter-discoverpingableserviceonlocalnetwork.git"
-    source: git
-    version: "0.0.1"
+      name: discoverpingableserviceonlocalnetwork
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "0.0.2"
   fake_async:
     dependency: transitive
     description:

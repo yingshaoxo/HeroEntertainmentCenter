@@ -47,25 +47,22 @@ class _MyHomePageState extends State<MyHomePage> {
     }
 
     print(wifi_address);
-    String? hosts =
-        await Discoverpingableserviceonlocalnetwork.findAllServicesInANetwork(
+    List<String>? hosts =
+        await Discoverpingableserviceonlocalnetwork.findServicesInANetwork(
             wifi_address + "/24", 5000, 5100);
     if (hosts != null) {
-      print(hosts);
-      List<dynamic> hostList = [];
-      try {
-        hostList = jsonDecode(hosts);
-      } catch (e) {
-        log(e.toString());
+      targetLocalShowURLlist.clear();
+      for (String host in hosts) {
+        targetLocalShowURLlist.add("http://" + host + "/ui");
       }
-      if (hostList.isNotEmpty) {
-        targetLocalShowURLlist.clear();
-        for (String host in hostList) {
-          targetLocalShowURLlist.add("http://" + host + "/ui");
-        }
-        setState(() {});
-      }
+      setState(() {});
     }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getEverythingDone();
   }
 
   @override
@@ -128,12 +125,12 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          await getEverythingDone();
-        },
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+          onPressed: () async {
+            await getEverythingDone();
+          },
+          tooltip: 'Increment',
+          child: Icon(Icons
+              .refresh)), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
