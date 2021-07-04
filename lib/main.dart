@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:discoverpingableserviceonlocalnetwork/discoverpingableserviceonlocalnetwork.dart';
 import 'package:heroentertainmentcenter/store.dart';
@@ -50,10 +52,12 @@ class _MyHomePageState extends State<MyHomePage> {
     List<String>? hosts =
         await Discoverpingableserviceonlocalnetwork.findServicesInANetwork(
             wifi_address + "/24", 5000, 5100);
+    //await Discoverpingableserviceonlocalnetwork.findServicesInANetwork( wifi_address + "/24", 80, 5100);
     if (hosts != null) {
       targetLocalShowURLlist.clear();
       for (String host in hosts) {
-        targetLocalShowURLlist.add("http://" + host + "/ui");
+        //targetLocalShowURLlist.add("http://" + host + "/ui");
+        targetLocalShowURLlist.add("http://" + host);
       }
       setState(() {});
     }
@@ -62,7 +66,9 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-    getEverythingDone();
+    Timer(const Duration(milliseconds: 1000), () {
+      getEverythingDone();
+    });
   }
 
   @override
@@ -97,6 +103,7 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         title: Text(widget.title),
       ),
+      //backgroundColor: Colors.black,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -125,6 +132,7 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
+          backgroundColor: Colors.green,
           onPressed: () async {
             await getEverythingDone();
           },
