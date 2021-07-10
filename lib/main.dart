@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:discoverpingableserviceonlocalnetwork/discoverpingableserviceonlocalnetwork.dart';
 import 'package:heroentertainmentcenter/store.dart';
 
+import 'package:isolate_handler/isolate_handler.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 void main() async {
@@ -28,6 +29,36 @@ class MyApp extends StatelessWidget {
   }
 }
 
+void getURLlistFromIsolate(Map<String, dynamic> context) {
+  final messenger = HandledIsolate.initialize(context);
+
+  messenger.listen((msg) async {
+    print(msg);
+
+    String? wifiAddress =
+        await Discoverpingableserviceonlocalnetwork.getWIFIaddress();
+
+    if (wifiAddress == null) {
+      return;
+    }
+
+    print(wifiAddress);
+    List<String>? hosts =
+        await Discoverpingableserviceonlocalnetwork.findServicesInANetwork(
+            wifiAddress + "/24", 5000, 5100);
+    //await Discoverpingableserviceonlocalnetwork.findServicesInANetwork( wifi_address + "/24", 80, 5100);
+
+    List<String>? urls = [];
+    if (hosts != null) {
+      for (String host in hosts) {
+        urls.add("http://" + host);
+      }
+    }
+
+    messenger.send(urls);
+  });
+}
+
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key? key, required this.title}) : super(key: key);
 
@@ -38,35 +69,30 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  final isolates = IsolateHandler();
   List<String> targetLocalShowURLlist = [];
 
-  Future<void> getEverythingDone() async {
-    String? wifi_address =
-        await Discoverpingableserviceonlocalnetwork.getWIFIaddress();
+  void setPath(List<String> urls) {
+    setState(() {
+      targetLocalShowURLlist = urls;
+    });
 
-    if (wifi_address == null) {
-      return;
-    }
+    isolates.kill('urlList');
+  }
 
-    print(wifi_address);
-    List<String>? hosts =
-        await Discoverpingableserviceonlocalnetwork.findServicesInANetwork(
-            wifi_address + "/24", 5000, 5100);
-    //await Discoverpingableserviceonlocalnetwork.findServicesInANetwork( wifi_address + "/24", 80, 5100);
-    if (hosts != null) {
-      targetLocalShowURLlist.clear();
-      for (String host in hosts) {
-        //targetLocalShowURLlist.add("http://" + host + "/ui");
-        targetLocalShowURLlist.add("http://" + host);
-      }
-      setState(() {});
-    }
+  getEverythingDone() {
+    isolates.spawn<List<String>>(getURLlistFromIsolate,
+        name: 'urlList',
+        onReceive: setPath,
+        onInitialized: () =>
+            isolates.send("made by yingshaoxo", to: 'urlList'));
   }
 
   @override
   void initState() {
     super.initState();
-    Timer(const Duration(milliseconds: 1000), () {
+
+    Future.delayed(Duration.zero, () {
       getEverythingDone();
     });
   }
@@ -133,8 +159,8 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       floatingActionButton: FloatingActionButton(
           backgroundColor: Colors.green,
-          onPressed: () async {
-            await getEverythingDone();
+          onPressed: () {
+            getEverythingDone();
           },
           tooltip: 'Increment',
           child: Icon(Icons
