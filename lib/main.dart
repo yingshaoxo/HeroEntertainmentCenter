@@ -9,6 +9,7 @@ import 'package:heroentertainmentcenter/store.dart';
 
 import 'package:isolate_handler/isolate_handler.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:http/http.dart' as http;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -45,13 +46,23 @@ void getURLlistFromIsolate(Map<String, dynamic> context) {
     print(wifiAddress);
     List<String>? hosts =
         await Discoverpingableserviceonlocalnetwork.findServicesInANetwork(
-            wifiAddress + "/24", 5000, 5100);
+            wifiAddress + "/24", 5000, 5010);
     //await Discoverpingableserviceonlocalnetwork.findServicesInANetwork( wifi_address + "/24", 80, 5100);
 
     List<String>? urls = [];
     if (hosts != null) {
       for (String host in hosts) {
-        urls.add("http://" + host);
+        String baseUrl = "http://" + host;
+        //print(baseUrl);
+        final response = await http
+            .get(Uri.parse("$baseUrl/api/info/"))
+            .timeout(Duration(milliseconds: 500), onTimeout: () {
+          return http.Response('Error', 500);
+        });
+        //print(response.body.toString());
+        if (response.statusCode == 200) {
+          urls.add(baseUrl);
+        }
       }
     }
 
@@ -109,13 +120,17 @@ class _MyHomePageState extends State<MyHomePage> {
           child: Container(
             constraints: BoxConstraints(minWidth: boxSize, minHeight: boxSize),
             padding: const EdgeInsets.all(8),
-            child: Center(child: Text(e, style: TextStyle(fontSize: 10))),
+            child: Center(child: Text(e, style: TextStyle(fontSize: 15))),
             //color: Colors.red[100],
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
                 gradient: LinearGradient(
               begin: Alignment.bottomCenter,
               end: Alignment.topCenter,
-              colors: <Color>[Colors.red, Colors.white, Colors.blue],
+              colors: [
+                Colors.red.withOpacity(0.1),
+                Colors.white.withOpacity(0.3),
+                Colors.blue.withOpacity(0.2)
+              ],
             )),
           ),
           onTap: () {
@@ -131,17 +146,16 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       //backgroundColor: Colors.black,
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            if (targetLocalShowURLlist.length < 1) ...[
-              Text(
-                'We are in search...',
-              ),
-            ] else ...[
-              SingleChildScrollView(
-                scrollDirection: Axis.vertical,
-                child: Center(
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              if (targetLocalShowURLlist.length < 1) ...[
+                Text(
+                  'We are in search...',
+                ),
+              ] else ...[
+                Center(
                   child: GridView.count(
                     primary: false,
                     padding: const EdgeInsets.all(20),
@@ -151,10 +165,10 @@ class _MyHomePageState extends State<MyHomePage> {
                     shrinkWrap: true,
                     children: getBoxList(),
                   ),
-                ),
-              )
-            ]
-          ],
+                )
+              ]
+            ],
+          ),
         ),
       ),
       floatingActionButton: FloatingActionButton(
