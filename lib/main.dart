@@ -36,17 +36,12 @@ void getURLlistFromIsolate(Map<String, dynamic> context) {
   messenger.listen((msg) async {
     print(msg);
 
-    String? wifiAddress =
-        await Discoverpingableserviceonlocalnetwork.getWIFIaddress();
-
-    if (wifiAddress == null) {
-      return;
-    }
+    String? wifiAddress = "192.168.49.1";
 
     print(wifiAddress);
     List<String>? hosts =
         await Discoverpingableserviceonlocalnetwork.findServicesInANetwork(
-            wifiAddress + "/24", 5000, 5010);
+            wifiAddress + "/24", 5000, 5050, 500);
     //await Discoverpingableserviceonlocalnetwork.findServicesInANetwork( wifi_address + "/24", 80, 5100);
 
     List<String>? urls = [];
